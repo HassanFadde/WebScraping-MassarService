@@ -4,7 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.common.by import By
 from accounts import username,password
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 #beautiful soup
 def get_page(page:str or tuple,i:int=0)->int:
     if type(page)==str:
@@ -22,10 +23,13 @@ def sendding_data(username:str,password:str,i:int=0)->int:
     i+=1
     print("action to change password page : ",i)
     try :
-        name_input=driver.find_element(By.ID,"UserName")
+        name_input=WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "UserName")))
+
+        name_input.clear()
         name_input.send_keys(username)
         
-        password_input=driver.find_element(By.ID,"Password")
+        password_input=WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "Password")))
+        password_input.clear()
         password_input.send_keys(password)
     
         password_input.submit()
