@@ -3,6 +3,7 @@ from aifc import Error
 from asyncio import selector_events
 from bs4 import BeautifulSoup
 from selenium import webdriver
+import time
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.common.by import By
 from soupsieve import select
@@ -76,6 +77,7 @@ def get_into_data_page(i=0):
         select_element.click()
         WebDriverWait(select_element,10).until(EC.presence_of_all_elements_located((By.TAG_NAME,"option")))[1].click()
         WebDriverWait(driver,10).until(EC.presence_of_element_located((By.ID,"btnSearchNotes"))).click()
+
         tbody=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.TAG_NAME,"tbody")))
     except :
         if driver.title=="MassarService" and driver.current_url==pages1["MassarService"][1] :
