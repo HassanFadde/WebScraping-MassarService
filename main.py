@@ -18,11 +18,12 @@ def get_page(page:str or tuple,i:int=0)->int:
     try : 
         driver.get(page[1])
         if page[0] not in str(driver.title) or driver.current_url!=page[1]:
-            raise Error("Try again !!")
+            raise ValueError("Try again !!")
     except : 
         i=get_page(page,i)
     global lang
     lang=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.TAG_NAME,"html"))).get_attribute("lang")
+    #i=sendding_data(username,password,i)
     return i
 def sendding_data(username:str,password:str,i:int=0)->int:
     i+=1
@@ -46,17 +47,15 @@ def sendding_data(username:str,password:str,i:int=0)->int:
     if driver.title!="MassarService" :
         i=get_page("Login page",i)
         i=sendding_data(username,password,i)
+    #i=get_into_grades_page(i)
     return i
 def get_into_grades_page(i=0):
     i+=1
     print("action to get into grades pages : ",i)
     try :
-        #WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.TAG_NAME,"a")))[1].click()
-        div=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.CLASS_NAME,"inner")))
-        div.click()
-        a_element=WebDriverWait(div,10).until(EC.presence_of_element_located((By.LINK_TEXT,key_words[lang][0])))
-        a_element.click()
-        a_element=WebDriverWait(div,10).until(EC.presence_of_element_located((By.LINK_TEXT,key_words[lang][1])))
+        a_elements=WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.TAG_NAME,"a")))
+        a_elements[3].click()
+        a_element=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.LINK_TEXT,key_words[lang][1])))
         a_element.click()
         if driver.title!="MassarService" : 
             raise Error("try again !!")
@@ -67,6 +66,28 @@ def get_into_grades_page(i=0):
         if driver.current_url==pages1["Login page"][0]:
             i=sendding_data(username,password,i)
             i=get_into_grades_page(i)
+    #i=get_into_data_page(i)
+    return i
+def get_into_data_page(i=0):
+    i+=1
+    print("action to get data : ",i)
+    try :
+        select_element=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.ID,"SelectedSession")))
+        select_element.click()
+        WebDriverWait(select_element,10).until(EC.presence_of_all_elements_located((By.TAG_NAME,"option")))[1].click()
+        WebDriverWait(driver,10).until(EC.presence_of_element_located((By.ID,"btnSearchNotes"))).click()
+        tbody=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.TAG_NAME,"tbody")))
+    except :
+        if driver.title=="MassarService" and driver.current_url==pages1["MassarService"][1] :
+            i=get_into_data_page(i)
+        elif driver.title=="Login page" and driver.current_url==pages1["Login page"][0] :
+            i=sendding_data(username,password,i)
+            i=get_into_grades_page(i)
+            i=get_into_data_page(i)
+        else :
+            driver.back()
+            i=get_into_grades_page(i)
+            i=get_into_data_page(i) 
     return i
 def tuple_page(title:str,index=0)->tuple:
     return (title,pages1[title][index])
@@ -77,20 +98,23 @@ pages1={"Login page":["https://moutamadris.men.gov.ma/moutamadris/Account"],"Mas
 key_words={"ar":["التمدرس","تتبع النقط",["الدورة الأولى","الدورة الثانية","المعدل السنوي"]],"fr":["Scolarite","Mes notes",["Premiere semestre","Deuxième  semestre","Moyenne Annuelle"]]}
 Path="C:\Program Files (x86)\chromedriver.exe"
 driver=webdriver.Chrome(Path)
+total=0
 print("getting into Login page ...")
-print("get into Login page after : ",get_page("Login page")," operation .")
+i=get_page("Login page")
+total+=i
+print("get into Login page after : ",i," operation .")
 print("getting into change password page ...")
-print("get into change password page after : ",sendding_data(username,password)," operation .")
-#get into my grades
-#div=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.CLASS_NAME,"inner")))
-#div.click()
-#a_element=WebDriverWait(div,10).until(EC.presence_of_element_located((By.LINK_TEXT,key_words[lang][0])))
-#a_element.click()
-#a_element=WebDriverWait(div,10).until(EC.presence_of_element_located((By.LINK_TEXT,key_words[lang][1])))
-#a_element.click()
-#select_element=WebDriverWait(driver,10).until(EC.presence_of_element_located((By.ID,"SelectedSession")))
-#select_element.send_keys(1)
+i=sendding_data(username,password)
+total+=i
+print("get into change password page after : ",i," operation .")
 print("getting into grades page ...")
-print("get into grades page in : ",get_into_grades_page()," operation .")
+i=get_into_grades_page()
+total+=i
+print("get into grades page in : ",i," operation .")
+print("getting data ...")
+i=get_into_data_page()
+total+=i
+print("get data in : ",i," operation .")
+print("operation has successed after : ",total,"time")
 input()    
 driver.quit()
